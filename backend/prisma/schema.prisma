@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  
+  courses     Course[]
+  shareEvents ShareEvent[]
+  
+  @@map("users")
+}
+
+model Course {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resources Resource[]
+  
+  @@map("courses")
+}
+
+model Resource {
+  id          Int      @id @default(autoincrement())
+  courseId    Int
+  title       String
+  url         String
+  type        String
+  description String?
+  createdAt   DateTime @default(now())
+  
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  shareEvents ShareEvent[]
+  
+  @@map("resources")
+}
+
+model ShareEvent {
+  id         Int      @id @default(autoincrement())
+  resourceId Int
+  userId     Int
+  status     String
+  createdAt  DateTime @default(now())
+  
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("share_events")
+}
